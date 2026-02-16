@@ -1,6 +1,9 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
+import { sendWelcomeEmail } from "../emails/emailHanders.js";
+import "dotenv/config";
+import { ENV } from "../lib/env.js";
 
 export const signup = async(req,res) => {
     const { fullName, email, password } = req.body;
@@ -45,6 +48,14 @@ export const signup = async(req,res) => {
             res.status(400).json({message: "Invalid user data"});
         }
 
+        //todo: send welcome email
+
+        try {
+            await sendWelcomeEmail(newUser.email, newUser.fullName, ENV.CLIENT_URL);
+        } catch (error) {
+            console.error("Error sending welcome email:", error);
+        }
+
     } catch (error) {
         console.log("Error in signup controller:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -52,8 +63,11 @@ export const signup = async(req,res) => {
 }
 
 export const login = async(req,res) => {
-    try {
-        
+    const {email, password} = req.body;
+    try { 
+        if (!email || !password) {
+           return res.status(400).json({ message: "All fields are required" });
+        }
     } catch (error) {
         
     }
@@ -66,3 +80,5 @@ export const logout = async(req,res) => {
         
     }
 }
+
+//leetcode 92
